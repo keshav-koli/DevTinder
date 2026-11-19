@@ -85,17 +85,72 @@ app.get(/^\/a(bc)+d$/, (req, res) => {
 
 //! payload 
 
-app.get('/getUser',(req,res)=>{
+app.get('/getUser', (req, res) => {
     console.log(req.query);
-    res.send({route:'query params',method:2,value:req.query.userId});
+    res.send({ route: 'query params', method: 2, value: req.query.userId });
 })
 
-app.get('/getUserParam/:userId/:password',(req,res)=>{
+app.get('/getUserParam/:userId/:password', (req, res) => {
     console.log(req.params);
-    res.send({route:'dynamic params',method:2,value:req.params.userId});
+    res.send({ route: 'dynamic params', method: 2, value: req.params.userId });
 })
 
 app.listen(7777, () => {
     console.log("server is listening");
 
+})
+
+
+// ! Multiple  route handler
+app.use('/route', (req, res, next) => {
+    console.log("my way 1st");
+    next();
+
+}, (req, res, next) => {
+    // res.send("1st")
+    next();
+
+}, (req, res, next) => {
+    // res.send("2nd")
+    next()
+
+}, (req, res, next) => {
+    // res.send("3rd")
+    next()
+
+}, (req, res, next) => {
+    // res.send("4th")
+    next()
+
+})
+
+// import { authModule } from './middleware/auth';
+
+const { adminAuth, userAuth } = require('./middleware/auth')
+
+// app.get('/MyUserAuth', (req, res, next) => {
+//     let token = 'sad';
+//     if (token != 'sad') {
+//         res.status(402).send("unauthorised access")
+//     } else {
+//         next()
+//     }
+// }, (req, res) => {
+//     res.send("tera bhai seedhe maut")
+// })
+
+app.use('/admin', adminAuth);
+
+
+app.get('/admin/login', (req, res, next) => {
+    res.send("Login Successfully...")
+})
+
+app.get('/admin/getData', (req, res) => {
+    res.send("data fetched...")
+})
+app.use('/myUser', userAuth);
+
+app.get('/myUser/login', (req, res, next) => {
+    res.send("Login Successfully...")
 })
