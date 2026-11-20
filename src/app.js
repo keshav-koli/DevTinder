@@ -154,3 +154,33 @@ app.use('/myUser', userAuth);
 app.get('/myUser/login', (req, res, next) => {
     res.send("Login Successfully...")
 })
+
+// ? Error Handling
+
+app.use('/', (err, req, res, next) => {
+    console.log("dsfdsa");
+
+    if (err) {
+        res.status(500).send("Something went wrong")
+    }
+    // res.send("dsfa")
+})
+
+app.use('/crucialData', (req, res, next) => {
+    // try {
+    // DB logic fail
+    throw new Error("dffdads");
+    res.send("sending to me")
+    // }
+    // catch {
+    // res.status(500).send("Somethign went wrong")
+    // }
+})
+app.use('/', (err, req, res, next) => {
+    console.log("asdd");
+
+    if (err) {
+        res.status(500).send("Something went wrong....")
+    }
+    // res.send("dsfa")
+})
