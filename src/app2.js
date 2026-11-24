@@ -80,11 +80,22 @@ app.delete('/user', async (req, res) => {
 
 // ! update user 
 
-app.patch('/user', async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
     const data = req.body;
-    const id = req.body.id
+    const id = req.params?.userId
 
     try {
+
+        const allowedUpdates = ['firstName', 'lastName', 'age', 'gender', 'address', 'about', 'skills', 'photoUrl','password'];
+        const canBeChangedField = Object.keys(data).every((item) => allowedUpdates.includes(item));
+        console.log(canBeChangedField);
+
+        if (!canBeChangedField) {
+            throw new Error("not able to change, only valid fields can be changed ")
+        }
+        if (req.body.skills && req.body.skills.length > 10) {
+            throw new Error("can't add more than 10 skills")
+        }
         // const user = await User.findByIdAndDelete( id );
         // const user = await User.findByIdAndUpdate({ _id: id },data);
         const user = await User.findByIdAndUpdate({ _id: id }, data, { returnDocument: 'after', runValidators: true });
