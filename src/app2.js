@@ -2,6 +2,8 @@ const express = require('express')
 const { testConnection } = require('./config/database')
 const User = require('./model/user');
 const app = express();
+const { validatorForSignUp } = require('./utils/validator');
+const bcrypt = require('bcrypt');
 
 app.use(express.json())
 app.post('/signup', async (req, res, next) => {
@@ -13,8 +15,19 @@ app.post('/signup', async (req, res, next) => {
         //     phoneNumber: 9874563210,
         //     address: 'karampura'
         // })
-        const user = new User(req.body);
         console.log(req.body);
+        validatorForSignUp(req)
+        
+        const uncryptedPassword =await bcrypt.hash(req.body.password, 10);
+        const { firstName, lastName, email, password, phoneNumber } = req.body;
+        const user = new User({
+            firstName,
+            lastName,
+            email,
+            password: uncryptedPassword,
+            phoneNumber
+        });
+        // console.log(req.body);
         await user.save()
         res.send("User Saved Successfully")
     } catch (error) {
@@ -86,7 +99,7 @@ app.patch("/user/:userId", async (req, res) => {
 
     try {
 
-        const allowedUpdates = ['firstName', 'lastName', 'age', 'gender', 'address', 'about', 'skills', 'photoUrl','password'];
+        const allowedUpdates = ['firstName', 'lastName', 'age', 'gender', 'address', 'about', 'skills', 'photoUrl', 'password'];
         const canBeChangedField = Object.keys(data).every((item) => allowedUpdates.includes(item));
         console.log(canBeChangedField);
 
