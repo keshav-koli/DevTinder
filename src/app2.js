@@ -4,8 +4,10 @@ const User = require('./model/user');
 const app = express();
 const { validatorForSignUp } = require('./utils/validator');
 const bcrypt = require('bcrypt');
-
+const cookieParse = require('cookie-parser');
+const myJWT = require('jsonwebtoken');
 app.use(express.json())
+app.use(cookieParse())
 app.post('/signup', async (req, res, next) => {
     try {
         // const user = new User({
@@ -18,8 +20,8 @@ app.post('/signup', async (req, res, next) => {
         console.log(req.body);
         validatorForSignUp(req)
 
-        const uncryptedPassword = await bcrypt.hash(req.body.password, 10);
         const { firstName, lastName, email, password, phoneNumber } = req.body;
+        const uncryptedPassword = await bcrypt.hash(password, 10);
         const user = new User({
             firstName,
             lastName,
@@ -36,25 +38,46 @@ app.post('/signup', async (req, res, next) => {
     }
 })
 
+// ! Login api with token sending
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const userDetails = await User.findOne({ email: email });
-        console.log(userDetails);
-
+        // console.log(userDetails);
+        const { _id } = userDetails;
         if (!userDetails) {
             throw new Error('Invalid credentail');
         }
         const matchPassword = await bcrypt.compare(password, userDetails.password);
-        console.log(matchPassword);
+        // console.log(matchPassword);
 
         if (!matchPassword) {
             throw new Error('Invalid password')
         } else {
+            const jwtToken = myJWT.sign({ _id }, 'DevTinder@123')
+            res.cookie('Token', jwtToken)
             res.send('Login successfully!!!')
         }
     } catch (err) {
         res.status(400).send("Error: " + err)
+    }
+})
+
+// ! Profile api with jwt token
+app.get('/profile', async (req, res) => {
+    try {
+        const { Token } = req.cookies;
+        console.log(Token);
+        if (!Token) {
+            throw new Error('Please Login Again')
+        }
+        const decodedMessage = myJWT.verify(Token, 'DevTinder@123')
+        console.log(decodedMessage);
+        let { _id } = decodedMessage;
+        const details = await User.findOne({ _id });
+        res.send(details)
+    } catch (error) {
+        res.status(400).send(error.message)
     }
 })
 
