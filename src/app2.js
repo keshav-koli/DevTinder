@@ -6,8 +6,12 @@ const { validatorForSignUp } = require('./utils/validator');
 const bcrypt = require('bcrypt');
 const cookieParse = require('cookie-parser');
 const myJWT = require('jsonwebtoken');
+const { loginAuth } = require('./middleware/auth')
+
+
 app.use(express.json())
 app.use(cookieParse())
+
 app.post('/signup', async (req, res, next) => {
     try {
         // const user = new User({
@@ -54,8 +58,8 @@ app.post('/login', async (req, res) => {
         if (!matchPassword) {
             throw new Error('Invalid password')
         } else {
-            const jwtToken = myJWT.sign({ _id }, 'DevTinder@123')
-            res.cookie('Token', jwtToken)
+            const jwtToken = myJWT.sign({ _id }, 'DevTinder@123', { expiresIn: '1d' })
+            res.cookie('Token', jwtToken, { expires: new Date(Date.now() + 8 * 3600000) })
             res.send('Login successfully!!!')
         }
     } catch (err) {
@@ -64,18 +68,22 @@ app.post('/login', async (req, res) => {
 })
 
 // ! Profile api with jwt token
-app.get('/profile', async (req, res) => {
+app.get('/profile', loginAuth, async (req, res) => {
     try {
-        const { Token } = req.cookies;
-        console.log(Token);
-        if (!Token) {
-            throw new Error('Please Login Again')
-        }
-        const decodedMessage = myJWT.verify(Token, 'DevTinder@123')
-        console.log(decodedMessage);
-        let { _id } = decodedMessage;
-        const details = await User.findOne({ _id });
-        res.send(details)
+        // const { Token } = req.cookies;
+        // console.log(Token);
+        // if (!Token) {
+        //     throw new Error('Please Login Again')
+        // }
+        // const decodedMessage = myJWT.verify(Token, 'DevTinder@123')
+        // console.log(decodedMessage);
+        // let { _id } = decodedMessage;
+        // const userDetails = await User.findById(_id);
+        // if (!userDetails) throw new Error('User does not exist')
+        // else res.send(userDetails)
+
+        const userInfo = req.user;
+        res.send(userInfo);
     } catch (error) {
         res.status(400).send(error.message)
     }
@@ -94,12 +102,16 @@ app.get('/profile', async (req, res) => {
 // })
 
 // !  find by anything 
-app.get('/user', async (req, res) => {
+app.get('/user', loginAuth, async (req, res) => {
     // const userAge = req.body.userAge
 
     try {
-        const user = await User.find({});
-        res.send(user);
+        // const user = await User.find({});
+        // res.send(user);
+
+        // OR
+        const user = req.user;
+        res.send(user)
     }
     catch (err) {
         res.status(400).send(err.message);

@@ -7,7 +7,7 @@
 //     await mongoose.connect(process.env.MONGODB_URI, {
 //         serverSelectionTimeoutMS: 10000
 //     });
-    
+
 // }
 
 // module.exports = {
@@ -31,7 +31,7 @@ async function testConnection() {
 
         await mongoose.connect(process.env.MONGODB_URI, {
             serverSelectionTimeoutMS: 15000,
-            family: 4
+            // family: 4
         });
 
         console.log("Connected successfully!");
