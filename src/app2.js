@@ -17,8 +17,8 @@ app.post('/signup', async (req, res, next) => {
         // })
         console.log(req.body);
         validatorForSignUp(req)
-        
-        const uncryptedPassword =await bcrypt.hash(req.body.password, 10);
+
+        const uncryptedPassword = await bcrypt.hash(req.body.password, 10);
         const { firstName, lastName, email, password, phoneNumber } = req.body;
         const user = new User({
             firstName,
@@ -36,6 +36,27 @@ app.post('/signup', async (req, res, next) => {
     }
 })
 
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const userDetails = await User.findOne({ email: email });
+        console.log(userDetails);
+
+        if (!userDetails) {
+            throw new Error('Invalid credentail');
+        }
+        const matchPassword = await bcrypt.compare(password, userDetails.password);
+        console.log(matchPassword);
+
+        if (!matchPassword) {
+            throw new Error('Invalid password')
+        } else {
+            res.send('Login successfully!!!')
+        }
+    } catch (err) {
+        res.status(400).send("Error: " + err)
+    }
+})
 
 // ! findById function
 // app.post('/user', async (req, res) => {
