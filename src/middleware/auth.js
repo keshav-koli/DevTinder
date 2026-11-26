@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../model/user');
-const express = require('express')
+// const express = require('express')
 
 
-const app = express();
-app.use(express.json())
+// const app = express();
+// app.use(express.json())
 
 const adminAuth = (req, res, next) => {
     console.log("checking auth");
