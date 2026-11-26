@@ -47,18 +47,14 @@ app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const userDetails = await User.findOne({ email: email });
-        // console.log(userDetails);
-        const { _id } = userDetails;
-        if (!userDetails) {
-            throw new Error('Invalid credentail');
-        }
-        const matchPassword = await bcrypt.compare(password, userDetails.password);
-        // console.log(matchPassword);
-
-        if (!matchPassword) {
-            throw new Error('Invalid password')
-        } else {
-            const jwtToken = myJWT.sign({ _id }, 'DevTinder@123', { expiresIn: '1d' })
+        if (!userDetails) throw new Error('Invalid credentail');
+        // const { _id } = userDetails;
+        // const matchPassword = await bcrypt.compare(password, userDetails.password);
+        const matchPassword = await userDetails.validatePassword(password);
+        if (!matchPassword) throw new Error('Invalid password')
+        else {
+            // const jwtToken = myJWT.sign({ _id }, 'DevTinder@123', { expiresIn: '1d' })
+            const jwtToken = userDetails.jwtToken();
             res.cookie('Token', jwtToken, { expires: new Date(Date.now() + 8 * 3600000) })
             res.send('Login successfully!!!')
         }
@@ -101,17 +97,17 @@ app.get('/profile', loginAuth, async (req, res) => {
 //     }
 // })
 
-// !  find by anything 
+// !  find method 
 app.get('/user', loginAuth, async (req, res) => {
     // const userAge = req.body.userAge
 
     try {
-        // const user = await User.find({});
-        // res.send(user);
+        const user = await User.find({});
+        res.send(user);
 
         // OR
-        const user = req.user;
-        res.send(user)
+        // const user = req.user;
+        // res.send(user)
     }
     catch (err) {
         res.status(400).send(err.message);
