@@ -38,8 +38,6 @@ const userSchema = new mongoose.Schema({
         type: Number,
         min: 18,
         validate(val) {
-            console.log(val);
-
             if (!(val <= 100)) {
                 throw new Error('Age is not valid')
             }

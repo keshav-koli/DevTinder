@@ -11,6 +11,14 @@ const validatorForSignUp = (req) => {
     }
 };
 
+const validateEditRequest = (req) => {
+    const allowedEdit = ['firstName', 'lastName', 'age', 'phoneNumber', 'gender', 'address', 'about', 'skilld', 'photoUrl'];
+
+    const isValidate = Object.keys(req.body).every(item => allowedEdit.includes(item));
+
+    return isValidate;
+}
 module.exports = {
-    validatorForSignUp
+    validatorForSignUp,
+    validateEditRequest
 }
