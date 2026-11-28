@@ -33,8 +33,6 @@ const userAuth = (req, res, next) => {
 const loginAuth = async (req, res, next) => {
     try {
         const { Token } = req.cookies;
-        console.log(Token);
-
         if (!Token) throw new Error('please login again')
         const decodedMessage = jwt.verify(Token, 'DevTinder@123');
         const { _id } = decodedMessage;
